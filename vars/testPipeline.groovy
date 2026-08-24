@@ -2,8 +2,8 @@ def call (Map configMap) {
     pipeline {
         agent any
         environment {
-            projectName = configMap.projectName
-            componentName = configMap.componentName
+            projectName = configMap.get("projectName")
+            componentName = configMap.get("componentName")
         }
         stages {
             stage('Build') {
