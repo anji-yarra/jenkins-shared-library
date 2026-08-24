@@ -1,21 +1,24 @@
-def call (){
+def call (Map configMap) {
     pipeline {
         agent any
-
+        environment {
+            projectName = configMap.projectName
+            componentName = configMap.componentName
+        }
         stages {
             stage('Build') {
                 steps {
-                    echo 'Building application...'
+                    echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
                 }
             }
             stage('Test') {
                 steps {
-                    echo 'Testing application...'
+                    echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
                 }
             }
             stage('Deploy') {
                 steps {
-                    echo 'Deploying application...'
+                    echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
                 }
             }
         }
