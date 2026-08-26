@@ -18,6 +18,15 @@ def call(Map configMap) {
                     }
                 }
             }
+            stage('Install Dependencies') {
+                steps {
+                    script {
+                        sh """
+                            npm install
+                        """
+                    }
+                }
+            }
         }
     }
 }
