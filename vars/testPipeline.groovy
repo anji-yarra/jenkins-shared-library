@@ -3,7 +3,7 @@ def call (Map configMap) {
         agent any
         environment {
             projectName = configMap.get("projectName")
-            componentName = configMap.get("componentName")
+            componentName = configMap.get("componentName ")
         }
         stages {
             stage('Build') {
