@@ -7,9 +7,14 @@ def call(Map configMap) {
         }
 
         stages {
-            stage('Test Shared Library') {
+            stage('Read Version') {
                 steps {
-                    echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
+                    script {
+                        def packageJson = readJSON file: 'package.json'
+                        def appVersion = packageJson.version
+
+                        echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
+                    }
                 }
             }
         }
