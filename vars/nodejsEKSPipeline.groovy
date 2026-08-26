@@ -27,6 +27,15 @@ def call(Map configMap) {
                     }
                 }
             }
+            stage('Unit tests') {
+                steps {
+                    script {
+                        sh """
+                            npm test
+                        """
+                    }
+                }
+            }
         }
     }
 }
