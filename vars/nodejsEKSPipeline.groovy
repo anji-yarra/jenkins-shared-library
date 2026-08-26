@@ -14,6 +14,7 @@ def call(Map configMap) {
                         def appVersion = packageJson.version
 
                         echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
+                        echo "The application version is: ${appVersion}"
                     }
                 }
             }
