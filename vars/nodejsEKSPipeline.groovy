@@ -159,6 +159,39 @@ def call(Map configMap) {
                     }
                 }
             }
+            stage('SonarQube Analysis') {
+                steps {
+                    script {
+                        try {
+                            echo "Starting SonarQube Analysis..."
+
+                            // Dummy stage for now.
+                            // Real SonarQube scanner will be added later.
+                            sh '''
+                                echo "SonarQube server is not configured yet."
+                                echo "Skipping actual SonarQube analysis."
+                                echo "Dummy SonarQube scan completed successfully."
+                            '''
+
+                            utils.updateCommitStatus(
+                                'success',
+                                'SonarQube analysis passed (dummy)',
+                                'sonarqube'
+                            )
+
+                        } catch (Exception e) {
+
+                            utils.updateCommitStatus(
+                                'failure',
+                                'SonarQube analysis failed',
+                                'sonarqube'
+                            )
+
+                            throw e
+                        }
+                    }
+                }
+            }
             stage('Docker Build') {
                 steps {
                     script {
