@@ -171,17 +171,19 @@ def call(Map configMap) {
             stage('Docker Push') {
                 steps {
                     script {
-                        sh """
-                            aws ecr get-login-password --region us-east-1 | \
-                            docker login --username AWS --password-stdin \
-                            ${acc_id}.dkr.ecr.us-east-1.amazonaws.com
+                        withCredentials([
+                            [$class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'aws-creds']
+                        ]) {
+                            sh """
+                                aws ecr get-login-password --region us-east-1 | \
+                                docker login --username AWS --password-stdin \
+                                884057990406.dkr.ecr.us-east-1.amazonaws.com
 
-                            docker tag ${component}:${appVersion} \
-                            ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/roboshop/${component}:${appVersion}
-
-                            docker push \
-                            ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/roboshop/${component}:${appVersion}
-                        """
+                                docker push \
+                                884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${appVersion}
+                            """
+                        }
                     }
                 }
             }
