@@ -100,6 +100,12 @@ def call(Map configMap) {
 
                                     echo "---- Open Dependabot Alerts ----"
 
+                                    if ! jq -e 'type == "array"' alerts.json > /dev/null; then
+                                        echo "GitHub Dependabot API did not return an alerts array:"
+                                        cat alerts.json
+                                        exit 1
+                                    fi
+
                                     jq -r '.[] | [
                                         .number,
                                         .security_vulnerability.severity,
