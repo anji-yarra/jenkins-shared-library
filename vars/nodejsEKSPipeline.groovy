@@ -236,7 +236,6 @@ def call(Map configMap) {
 
                                 kubectl rollout status deployment/${component} -n roboshop-dev --timeout=120s
                             """
-                            }
                             utils.updateCommitStatus('success', 'Deployed to roboshop-dev', 'dev-deploy')
                         }
                         catch (Exception e) {
