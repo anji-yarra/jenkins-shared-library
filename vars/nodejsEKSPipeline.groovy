@@ -93,6 +93,11 @@ def call(Map configMap) {
                                         "https://api.github.com/repos/${REPO}/dependabot/alerts?state=open" \
                                         -o alerts.json
 
+                                    echo "===== GitHub API Response ====="
+                                    cat alerts.json
+                                    echo
+                                    echo "==============================="
+
                                     echo "---- Open Dependabot Alerts ----"
 
                                     jq -r '.[] | [
