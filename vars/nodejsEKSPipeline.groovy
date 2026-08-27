@@ -1,74 +1,90 @@
 def call(Map configMap) {
+
     pipeline {
+
         agent {
             node {
                 label 'ROBOSHOP'
             }
         }
+
         environment {
-            def appVersion = ""
-            acc_id = "160885265516"
+            appVersion = ""
+            acc_id = "884057990406"
             project = configMap.get("project")
             component = configMap.get("component")
             org = "anji-yarra"
         }
+
         stages {
+
             stage('Read Version') {
                 steps {
                     script {
-                        def packageJson = readJSON file: 'package.json'
-                        def appVersion = packageJson.version
 
-                        echo "Project: ${configMap.projectName}, Component: ${configMap.componentName}"
+                        def packageJson = readJSON file: 'package.json'
+
+                        appVersion = packageJson.version
+
+                        echo "Project: ${project}, Component: ${component}"
                         echo "The application version is: ${appVersion}"
                     }
                 }
             }
+
             stage('Install Dependencies') {
                 steps {
-                    script {
-                        sh """
-                            npm install
-                        """
-                    }
+                    sh 'npm install'
                 }
             }
-            stage('Unit tests') {
+
+            stage('Unit Tests') {
                 steps {
                     script {
+
                         try {
+
                             sh 'npm test'
 
                             utils.updateCommitStatus(
                                 'SUCCESS',
                                 'Unit tests passed',
-                                'unit-tests',
+                                'unit-tests'
                             )
+
                         } catch (Exception e) {
+
                             utils.updateCommitStatus(
                                 'FAILURE',
                                 'Unit tests failed',
-                                'unit-tests',
+                                'unit-tests'
                             )
+
                             throw e
                         }
                     }
                 }
             }
+
             stage('Library Scan') {
                 steps {
                     script {
+
                         try {
+
                             withCredentials([
                                 string(
                                     credentialsId: 'github-token',
                                     variable: 'GH_TOKEN'
                                 )
                             ]) {
+
                                 sh '''
                                     set -e
 
                                     REPO="${org}/${component}"
+
+                                    echo "Scanning repository: ${REPO}"
 
                                     curl -s -L \
                                         -H "Accept: application/vnd.github+json" \
@@ -79,32 +95,42 @@ def call(Map configMap) {
 
                                     echo "---- Open Dependabot Alerts ----"
 
-                                    jq -r '.[] |
-                                        "\(.number)\t\(.security_vulnerability.severity)\t\(.dependency.package.name)\t\(.security_advisory.ghsa_id)"' \
-                                        alerts.json
+                                    jq -r '.[] | [
+                                        .number,
+                                        .security_vulnerability.severity,
+                                        .dependency.package.name,
+                                        .security_advisory.ghsa_id
+                                    ] | @tsv' alerts.json
 
                                     HIGH_CRITICAL_COUNT=$(jq '
-                                        [.[] |
-                                        select(
-                                            .security_vulnerability.severity == "high"
-                                            or
-                                            .security_vulnerability.severity == "critical"
-                                        )] | length
+                                        [
+                                            .[] |
+                                            select(
+                                                .security_vulnerability.severity == "high"
+                                                or
+                                                .security_vulnerability.severity == "critical"
+                                            )
+                                        ] | length
                                     ' alerts.json)
 
                                     echo "High/Critical alert count: ${HIGH_CRITICAL_COUNT}"
 
                                     if [ "$HIGH_CRITICAL_COUNT" -gt 0 ]; then
-                                        echo "Found High/Critical dependency vulnerabilities."
+
+                                        echo "❌ Found High/Critical dependency vulnerabilities."
+
                                         exit 1
+
                                     else
-                                        echo "No High/Critical dependency vulnerabilities found."
+
+                                        echo "✅ No High/Critical dependency vulnerabilities found."
+
                                     fi
                                 '''
                             }
 
                             utils.updateCommitStatus(
-                                'success',
+                                'SUCCESS',
                                 'Library scan passed',
                                 'library-scan'
                             )
@@ -112,7 +138,7 @@ def call(Map configMap) {
                         } catch (Exception e) {
 
                             utils.updateCommitStatus(
-                                'failure',
+                                'FAILURE',
                                 'Library scan failed',
                                 'library-scan'
                             )
