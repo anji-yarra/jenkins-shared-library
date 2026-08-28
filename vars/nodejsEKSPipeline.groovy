@@ -191,16 +191,19 @@ def call(Map configMap) {
                         }
                     }
                 }
-            }
             stage('Docker Build') {
                 steps {
                     script {
                         sh """
-                            docker build -t ${component}:${appVersion} .
+                            docker build \
+                                -t ${component}:${appVersion} \
+                                -t 884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${appVersion} \
+                                .
                         """
                     }
                 }
             }
+
             stage('Docker Push') {
                 steps {
                     script {
@@ -220,7 +223,7 @@ def call(Map configMap) {
                     }
                 }
             }
-            stage('dev-deploy') {
+            /*stage('dev-deploy') {
                 steps {
                     script {
                         try {
@@ -244,7 +247,7 @@ def call(Map configMap) {
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 }
