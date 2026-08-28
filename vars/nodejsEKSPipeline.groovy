@@ -224,31 +224,49 @@ def call(Map configMap) {
                     }
                 }
             }
-        }
-    }
-}            
-            /*stage('dev-deploy') {
+            stage('dev-deploy') {
                 steps {
                     script {
                         try {
-                            sh """
-                                aws eks update-kubeconfig --name roboshop-dev --region us-east-1
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                                sh """
+                                    aws eks update-kubeconfig \
+                                    --name roboshop-dev \
+                                    --region us-east-1
 
-                                helm upgrade --install ${component} ./helm \
+                                    helm upgrade --install ${component} ./helm \
                                     -f ./helm/values-dev.yaml \
                                     --namespace roboshop-dev \
-                                    --create-namespace \
                                     --set deployment.imageVersion=${appVersion} \
-                                    --wait --timeout 5m
+                                    --wait \
+                                    --timeout 5m
 
-                                kubectl rollout status deployment/${component} -n roboshop-dev --timeout=120s
-                            """
-                            utils.updateCommitStatus('success', 'Deployed to roboshop-dev', 'dev-deploy')
-                        }
-                        catch (Exception e) {
-                            utils.updateCommitStatus('failure', 'Deploy to roboshop-dev failed', 'dev-deploy')
+                                    kubectl rollout status \
+                                    deployment/${component} \
+                                    -n roboshop-dev \
+                                    --timeout=120s
+                                """
+                            }
+
+                            utils.updateCommitStatus(
+                                'success',
+                                'Deployed to roboshop-dev',
+                                'dev-deploy'
+                            )
+
+                        } catch (Exception e) {
+
+                            utils.updateCommitStatus(
+                                'failure',
+                                'Deploy to roboshop-dev failed',
+                                'dev-deploy'
+                            )
+
                             throw e
                         }
                     }
                 }
-            }*/
+            }
+        }
+    }
+}
