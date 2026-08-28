@@ -191,6 +191,7 @@ def call(Map configMap) {
                         }
                     }
                 }
+            }
             stage('Docker Build') {
                 steps {
                     script {
@@ -223,6 +224,9 @@ def call(Map configMap) {
                     }
                 }
             }
+        }
+    }
+}            
             /*stage('dev-deploy') {
                 steps {
                     script {
@@ -248,6 +252,3 @@ def call(Map configMap) {
                     }
                 }
             }*/
-        }
-    }
-}
