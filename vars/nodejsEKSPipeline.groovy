@@ -228,24 +228,28 @@ def call(Map configMap) {
                 steps {
                     script {
                         try {
+
                             sh """
+                                aws sts get-caller-identity
+
                                 aws eks update-kubeconfig \
-                                --name roboshop-dev \
-                                --region us-east-1
+                                    --name roboshop-dev \
+                                    --region us-east-1
+
+                                kubectl get nodes
 
                                 helm upgrade --install ${component} ./helm \
-                                -f ./helm/values-dev.yaml \
-                                --namespace roboshop-dev \
-                                --set deployment.imageVersion=${appVersion} \
-                                --wait \
-                                --timeout 5m
+                                    -f ./helm/values-dev.yaml \
+                                    --namespace roboshop-dev \
+                                    --set deployment.imageVersion=${appVersion} \
+                                    --wait \
+                                    --timeout 5m
 
                                 kubectl rollout status \
-                                deployment/${component} \
-                                -n roboshop-dev \
-                                --timeout=120s
+                                    deployment/${component} \
+                                    -n roboshop-dev \
+                                    --timeout=120s
                             """
-                            }
 
                             utils.updateCommitStatus(
                                 'success',
