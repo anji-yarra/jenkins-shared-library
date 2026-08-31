@@ -10,6 +10,7 @@ def call(Map configMap) {
 
         environment {
             appVersion = ""
+            commitId = ""
             acc_id = "884057990406"
             project = configMap.get("project")
             component = configMap.get("component")
@@ -25,9 +26,14 @@ def call(Map configMap) {
                         def packageJson = readJSON file: 'package.json'
 
                         appVersion = packageJson.version
+                        commitId = sh(
+                            script: 'git rev-parse --short HEAD',
+                            returnStdout: true
+                        ).trim()
 
                         echo "Project: ${project}, Component: ${component}"
-                        echo "The application version is: ${appVersion}"
+                        echo "Application version: ${appVersion}"
+                        echo "Commit ID: ${commitId}"
                     }
                 }
             }
@@ -197,8 +203,8 @@ def call(Map configMap) {
                     script {
                         sh """
                             docker build \
-                                -t ${component}:${appVersion} \
-                                -t 884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${appVersion} \
+                                -t ${component}:${commitId} \
+                                -t 884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${commitId} \
                                 .
                         """
                     }
@@ -218,7 +224,7 @@ def call(Map configMap) {
                                 884057990406.dkr.ecr.us-east-1.amazonaws.com
 
                                 docker push \
-                                884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${appVersion}
+                                884057990406.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${commitId}
                             """
                         }
                     }
@@ -242,7 +248,7 @@ def call(Map configMap) {
                                     -f ./helm/values-dev.yaml \
                                     --namespace roboshop-dev \
                                     --create-namespace \
-                                    --set deployment.imageVersion=${appVersion} \
+                                    --set deployment.imageVersion=${commitId} \
                                     --wait --timeout 5m
 
                                 kubectl rollout status \
